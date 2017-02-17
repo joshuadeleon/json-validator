@@ -1,0 +1,43 @@
+﻿[
+	
+	{
+		"Id": "1",
+		"Name": "Steven Watkins",
+		"Uuid": "0ee89f3d-1307-40a8-9a3b-4a3a0e7ec5ee",
+		"Truth": "false",
+		"Options": "No",
+		"Fraction": "1.834"
+	},
+	{
+		"Id": "2",
+		"Name": "Ralph Palmer",
+		"Uuid": "15740aa1-8eb0-4625-a2fc-bb45c7284b13",
+		"Truth": "true",
+		"Options": "Yes",
+		"Fraction": "9.357"
+	},
+	{
+		"Id": "3",
+		"Name": "Jonathan Cooper",
+		"Uuid": "df08bb77-0597-493f-8f90-9f0b2f76272e",
+		"Truth": "false",
+		"Options": "No",
+		"Fraction": "7.356"
+	},
+	{
+		"Id": "4",
+		"Name": "Diana Ray",
+		"Uuid": "930fe39e-8e9c-433e-917c-45dc2c4310ee",
+		"Truth": "false",
+		"Options": "No",
+		"Fraction": "3.796"
+	},
+	{
+		"Id": "5",
+		"Name": "Mark Perry",
+		"Uuid": "9ee77a0a-2d9c-4370-9f84-342754dc6674",
+		"Truth": "true",
+		"Options": "Yes",
+		"Fraction": "5.098"
+	}
+]
