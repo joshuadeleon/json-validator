@@ -249,5 +249,18 @@ namespace Transtatic.Json.Validation.Tests.Json.Validation {
 			//	Assert
 			Assert.False(result.HasErrors);
 		}
+
+		[Fact]
+		public void CanHandleNullUnknownPropertyValues() {
+			//	Arrange
+			var nullUnknownProperty = @"[{""Id"": ""1"", ""Name"": ""Jane"", ""Stuff"": null}]";
+
+			//	Act
+			var result = StringData.Validate(simpleJsonSchema, nullUnknownProperty);
+
+			//	Assert
+			Assert.True(result.HasWarnings);
+			Assert.Equal(1, result.EntityWarnings.Count);
+		}
 	}
 }

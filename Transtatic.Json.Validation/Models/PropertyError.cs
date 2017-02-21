@@ -1,21 +1,20 @@
 ﻿namespace Transtatic.Json.Validation.Models {
-	public class PropertyError {
+	/// <summary>
+	/// Property error report for a record (entity) in a data validation
+	/// </summary>
+	public class PropertyError : Property {
 		#region Properties
-		public string Value { get; set; }
 		public string ErrorMessage {
 			get {
-				return $"The {PropertyName} property was expected to be of type {ExpectedType} but was given {Value}";
+				return $"The {Name} property was expected to be of type {ExpectedType} but was given {Value}";
 			}
 		}
 		public string ExpectedType { get; set; }
-		public string PropertyName { get; set; }
 		#endregion
 
 		#region Constructors
-		public PropertyError(string propertyName, string expectedType, string value) {
-			Value = value;
+		public PropertyError(string name, string expectedType, string value) : base(name, value) {
 			ExpectedType = expectedType;
-			PropertyName = propertyName;
 		}
 		#endregion
 

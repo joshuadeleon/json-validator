@@ -54,7 +54,7 @@ namespace Transtatic.Net.Http.Client {
 		}
 
 		/// <summary>
-		/// Sends data async with a bearer token
+		/// Sends data async with an optional bearer token
 		/// </summary>
 		/// <param name="httpMethod">The http verb</param>
 		/// <param name="uri">The uri for the request</param>

@@ -25,13 +25,13 @@ namespace Transtatic.Json.Validation {
 		/// <param name="schema">The JSON schema to validate data against.</param>
 		/// <param name="json">The JSON data to validate.</param>
 		/// <returns>ValidationResult containing schema errors.</returns>
-		public static DataValidationResult Validate(HttpResponseMessage httpRequest, JsonSchema4 schema, string json) {
+		public static DataValidation Validate(HttpResponseMessage httpRequest, JsonSchema4 schema, string json) {
 			var modelProperties = schema.Properties;
 			var requiredProperties = new HashSet<string>(schema.RequiredProperties);
 
 			//	TODO: this is simple and does not account for complex fields (arrays, objects)
 			var modelDescriptors = modelProperties
-											.Select(property => new ModelDescriptor(property.Value, requiredProperties.Contains(property.Key)))
+											.Select(property => new DataDescriptor(property.Value, requiredProperties.Contains(property.Key)))
 											.ToDictionary(x => x.FieldName);
 
 			var deserializedJson = JsonConvert.DeserializeObject<IEnumerable<ExpandoObject>>(json);
@@ -40,12 +40,12 @@ namespace Transtatic.Json.Validation {
 		}
 
 		//	If json not http based
-		public static DataValidationResult Validate(JsonSchema4 schema, string json) {
+		public static DataValidation Validate(JsonSchema4 schema, string json) {
 			return Validate(new HttpResponseMessage() { RequestMessage = new HttpRequestMessage(HttpMethod.Get, default(Uri)) }, schema, json);
 		}
 
 		// Uses timing
-		public static DataValidationResult Validate(TimedHttpResponseMessage timedResponse, JsonSchema4 schema, string json) {
+		public static DataValidation Validate(TimedHttpResponseMessage timedResponse, JsonSchema4 schema, string json) {
 			var validationResult = Validate(timedResponse.Response, schema, json);
 			validationResult.ResponseTime = timedResponse.ResponseTime;
 
@@ -53,7 +53,7 @@ namespace Transtatic.Json.Validation {
 		}
 
 		//	TODO: Allow for streaming data
-		public static DataValidationResult Validate(JsonSchema4 schema, JsonTextReader jsonReader) {
+		public static DataValidation Validate(JsonSchema4 schema, JsonTextReader jsonReader) {
 			throw new NotImplementedException();
 		}
 
@@ -89,8 +89,8 @@ namespace Transtatic.Json.Validation {
 
 		#region Private Methods
 
-		private static DataValidationResult ValidateStringValues(HttpResponseMessage httpRequest, JsonSchema4 schema, IEnumerable<ExpandoObject> jsonData, HashSet<string> requiredProperties, IDictionary<string, ModelDescriptor> modelDescriptors) {
-			var validationResults = new DataValidationResult(httpRequest, schema);
+		private static DataValidation ValidateStringValues(HttpResponseMessage httpRequest, JsonSchema4 schema, IEnumerable<ExpandoObject> jsonData, HashSet<string> requiredProperties, IDictionary<string, DataDescriptor> modelDescriptors) {
+			var validationResults = new DataValidation(httpRequest, schema);
 
 			var sw = new System.Diagnostics.Stopwatch();
 			sw.Start();
@@ -133,7 +133,8 @@ namespace Transtatic.Json.Validation {
 						}
 					}
 					else {
-						entityWarnings.UnknownProperties.Add(new UnknownProperty(property.Key, property.Value.ToString()));
+						var value = property.Value == null ? (string)null : property.Value.ToString();
+						entityWarnings.UnknownProperties.Add(new UnknownProperty(property.Key, value));
 					}
 
 					
@@ -179,7 +180,7 @@ namespace Transtatic.Json.Validation {
 		/// <param name="dataType">The data type of the given value</param>
 		/// <param name="value">The value to type check</param>
 		/// <returns>True of successful, otherwise throws exception</returns>
-		private static bool TryDataConversion(ModelDescriptor descriptor, object data) {
+		private static bool TryDataConversion(DataDescriptor descriptor, object data) {
 			//	Gaurd against null reference
 			if (data == null)
 				throw new NullReferenceException();

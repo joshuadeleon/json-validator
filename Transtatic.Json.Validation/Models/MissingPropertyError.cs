@@ -1,4 +1,7 @@
 ﻿namespace Transtatic.Json.Validation.Models {
+
+	//	 TODO: Use property error with a different message here. remove this property. 
+
 	public class MissingPropertyError {
 		public string ErrorMessage {
 			get {

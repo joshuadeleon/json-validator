@@ -49,13 +49,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Interfaces\IProperty.cs" />
     <Compile Include="Models\EntityError.cs" />
     <Compile Include="Models\EntityWarning.cs" />
     <Compile Include="Models\MissingPropertyError.cs" />
-    <Compile Include="Models\ModelDescriptor.cs" />
+    <Compile Include="Models\DataDescriptor.cs" />
+    <Compile Include="Models\Property.cs" />
     <Compile Include="Models\PropertyError.cs" />
     <Compile Include="Models\UnknownProperty.cs" />
-    <Compile Include="Models\DataValidationResult.cs" />
+    <Compile Include="Models\DataValidation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\JsonTools.cs" />
     <Compile Include="Utilities\Schema.cs" />
