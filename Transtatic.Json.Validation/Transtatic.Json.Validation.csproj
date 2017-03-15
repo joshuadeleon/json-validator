@@ -49,19 +49,24 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataValidator.cs" />
+    <Compile Include="Enums\MessageType.cs" />
+    <Compile Include="Interfaces\IEntityValidation.cs" />
     <Compile Include="Interfaces\IProperty.cs" />
-    <Compile Include="Models\EntityError.cs" />
-    <Compile Include="Models\EntityWarning.cs" />
-    <Compile Include="Models\MissingPropertyError.cs" />
+    <Compile Include="Interfaces\IPropertyMessage.cs" />
     <Compile Include="Models\DataDescriptor.cs" />
+    <Compile Include="Models\EntityReport.cs" />
+    <Compile Include="Models\EntityReportCollection.cs" />
     <Compile Include="Models\Property.cs" />
     <Compile Include="Models\PropertyError.cs" />
+    <Compile Include="Models\PropertyMessage.cs" />
+    <Compile Include="Models\PropertyMessageCollection.cs" />
+    <Compile Include="Models\RequiredPropertyError.cs" />
     <Compile Include="Models\UnknownProperty.cs" />
-    <Compile Include="Models\DataValidation.cs" />
+    <Compile Include="Models\DataValidationReport.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\JsonTools.cs" />
     <Compile Include="Utilities\Schema.cs" />
-    <Compile Include="StringData.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

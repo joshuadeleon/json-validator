@@ -34,10 +34,11 @@ namespace Transtatic.Json.Validate.Console {
 					var result = await ApiClient.SendAsync(HttpMethod.Post, new Uri(url), null, data);
 					var json = await JsonTools.Get(result.Response);
 
-					var validateResult = StringData.Validate(result, schema, json);
+					var dataValidator = new DataValidator();
+					var validateResult = dataValidator.Validate(result, schema, json);
 					var fileContents = validateResult.WriteToString();
 
-					File.WriteAllText("output.md", fileContents);
+					File.WriteAllText("output.txt", fileContents);
 				}
 				catch (InvalidOperationException ioe) {
 					logger.Debug(ioe, "");

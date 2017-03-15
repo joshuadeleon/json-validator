@@ -1,8 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 
-namespace Transtatic.Json.Validation.Tests.Helpers.SchemaModels {
-	public class SimpleJson {
+namespace Transtatic.Json.Validation.Tests.TestModels
+{
+	public class TestSchema
+	{
 		[Required]
 		[RegularExpression("^[A-Za-z0-9\\s]+$")]
 		public string Name { get; set; }

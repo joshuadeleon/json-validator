@@ -87,17 +87,17 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="Helpers\Schema.cs" />
-    <Compile Include="Helpers\SchemaModels\SimpleJson.cs" />
-    <Compile Include="Json.Validation\StringDataTests.cs" />
+    <Compile Include="DataValidatorTests.cs" />
+    <Compile Include="Models\PropertyMessageCollectionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestModels\TestSchema.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="Json\validSimpleSchema.json">
+    <None Include="Json\validTestSchema.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Json\invalidSimpleSchema.json">
+    <None Include="Json\invalidTestSchema.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />

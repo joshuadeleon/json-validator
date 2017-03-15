@@ -5,8 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Transtatic.Json.Validation.Interfaces {
-	public interface IProperty {
+	/// <summary>
+	/// Abstracts a field/property a its value
+	/// </summary>
+	public interface IProperty
+	{
 		string Name { get; set; }
-		string Value { get; set; } 
+		string Value { get; set; }
 	}
 }

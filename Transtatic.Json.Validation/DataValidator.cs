@@ -11,10 +11,13 @@ using System.Net.Http;
 using Transtatic.Json.Validation.Models;
 using Transtatic.Net.Http.Models;
 
-
-namespace Transtatic.Json.Validation {
-	public static class StringData {
-		
+namespace Transtatic.Json.Validation
+{
+	/// <summary>
+	/// Methods to validate json data with string values against a json schema
+	/// </summary>
+	public class DataValidator
+	{
 		#region Public Methods
 		/// <summary>
 		/// Validates JSON data types against given schema where JSON data values contain string representation data type
@@ -25,7 +28,8 @@ namespace Transtatic.Json.Validation {
 		/// <param name="schema">The JSON schema to validate data against.</param>
 		/// <param name="json">The JSON data to validate.</param>
 		/// <returns>ValidationResult containing schema errors.</returns>
-		public static DataValidation Validate(HttpResponseMessage httpRequest, JsonSchema4 schema, string json) {
+		public DataValidationReport Validate(HttpResponseMessage httpRequest, JsonSchema4 schema, string json)
+		{
 			var modelProperties = schema.Properties;
 			var requiredProperties = new HashSet<string>(schema.RequiredProperties);
 
@@ -40,12 +44,14 @@ namespace Transtatic.Json.Validation {
 		}
 
 		//	If json not http based
-		public static DataValidation Validate(JsonSchema4 schema, string json) {
+		public DataValidationReport Validate(JsonSchema4 schema, string json)
+		{
 			return Validate(new HttpResponseMessage() { RequestMessage = new HttpRequestMessage(HttpMethod.Get, default(Uri)) }, schema, json);
 		}
 
 		// Uses timing
-		public static DataValidation Validate(TimedHttpResponseMessage timedResponse, JsonSchema4 schema, string json) {
+		public DataValidationReport Validate(TimedHttpResponseMessage timedResponse, JsonSchema4 schema, string json)
+		{
 			var validationResult = Validate(timedResponse.Response, schema, json);
 			validationResult.ResponseTime = timedResponse.ResponseTime;
 
@@ -53,7 +59,8 @@ namespace Transtatic.Json.Validation {
 		}
 
 		//	TODO: Allow for streaming data
-		public static DataValidation Validate(JsonSchema4 schema, JsonTextReader jsonReader) {
+		public DataValidationReport Validate(JsonSchema4 schema, JsonTextReader jsonReader)
+		{
 			throw new NotImplementedException();
 		}
 
@@ -63,24 +70,28 @@ namespace Transtatic.Json.Validation {
 		/// </summary>
 		/// <param name="input"></param>
 		/// <returns></returns>
-		public static bool IsValidJson(string input) {
+		public bool IsValidJson(string input)
+		{
 			input = input.Trim();
 			if ((input.StartsWith("{") && input.EndsWith("}")) || //For object
 				 (input.StartsWith("[") && input.EndsWith("]"))) //For array
 			{
-				try {
+				try
+				{
 					var obj = JToken.Parse(input);
 					return true;
 				}
-				catch (JsonReaderException) {
+				catch (JsonReaderException)
+				{
 					return false;
 				}
-				catch (Exception)		
+				catch (Exception)
 				{
 					return false;
 				}
 			}
-			else {
+			else
+			{
 				return false;
 			}
 		}
@@ -89,74 +100,80 @@ namespace Transtatic.Json.Validation {
 
 		#region Private Methods
 
-		private static DataValidation ValidateStringValues(HttpResponseMessage httpRequest, JsonSchema4 schema, IEnumerable<ExpandoObject> jsonData, HashSet<string> requiredProperties, IDictionary<string, DataDescriptor> modelDescriptors) {
-			var validationResults = new DataValidation(httpRequest, schema);
+		private DataValidationReport ValidateStringValues(HttpResponseMessage httpRequest, JsonSchema4 schema, IEnumerable<ExpandoObject> jsonData, HashSet<string> requiredProperties, IDictionary<string, DataDescriptor> modelDescriptors)
+		{
+			var totalProperties = 0;
+			var totalEntities = 0;
+			var entityReportCollection = new EntityReportCollection();
 
-			var sw = new System.Diagnostics.Stopwatch();
-			sw.Start();
-
-			foreach (var dataItem in jsonData) {
-				var entityErrors = new EntityError(dataItem);
-				var entityWarnings = new EntityWarning(dataItem);
+			foreach (var dataItem in jsonData)
+			{
+				var entityErrors = new EntityReport(dataItem);
+				//var entityWarnings = new EntityWarning(dataItem);
 
 				//	Sets Errors for missing properties in json data
 				var missingProperties = HasRequiredProperties(requiredProperties, dataItem);
-				if (missingProperties.Any()) {
-					entityErrors.MissingPropertyErrors = missingProperties;
+				if (missingProperties.Any())
+				{
+					entityErrors.Properties.AddRange(missingProperties);
 				}
 
 				//	Sets Errors for invalid data types in values
-				foreach (var property in dataItem) {
-					validationResults.TotalPropertyCount++;
-					if (modelDescriptors.ContainsKey(property.Key)) {
-						var modelDescriptor = modelDescriptors[property.Key];
+				foreach (var property in dataItem)
+				{
+					totalProperties++;
+
+					if (modelDescriptors.ContainsKey(property.Key))
+					{
+						var DataDescriptor = modelDescriptors[property.Key];
 						var isTypeMatch = false;
-						try {
-							if (!modelDescriptor.IsNullable || property.Value != null) {
-								isTypeMatch = TryDataConversion(modelDescriptor, property.Value);
+						try
+						{
+							if (!DataDescriptor.IsNullable || property.Value != null)
+							{
+								isTypeMatch = TryDataConversion(DataDescriptor, property.Value);
 							}
 
 							//	Valid if property is nullable and value is null
-							if (modelDescriptor.IsNullable && property.Value == null)
+							if (DataDescriptor.IsNullable && property.Value == null)
 								continue;
 
 							//	Add to Errors if conversion fails
-							if (!isTypeMatch) {
-								entityErrors.PropertyErrors.Add(new PropertyError(property.Key, modelDescriptor.DataType, property.Value.ToString()));
+							if (!isTypeMatch)
+							{
+								entityErrors.Properties.Add(new PropertyError(property.Key, property.Value.ToString(), DataDescriptor.DataType));
 							}
 						}
-						catch (InvalidCastException) {
-							entityErrors.PropertyErrors.Add(new PropertyError(property.Key, modelDescriptor.DataType, property.Value.ToString()));
+						catch (InvalidCastException)
+						{
+							entityErrors.Properties.Add(new PropertyError(property.Key, property.Value.ToString(), DataDescriptor.DataType));
 						}
-						catch (NullReferenceException) {
-							entityErrors.PropertyErrors.Add(new PropertyError(property.Key, modelDescriptor.DataType, "NULL"));
+						catch (NullReferenceException)
+						{
+							entityErrors.Properties.Add(new PropertyError(property.Key, "NULL", DataDescriptor.DataType));
 						}
 					}
-					else {
-						var value = property.Value == null ? (string)null : property.Value.ToString();
-						entityWarnings.UnknownProperties.Add(new UnknownProperty(property.Key, value));
+					else
+					{
+						var value = property.Value == null ? null : property.Value.ToString();
+						entityErrors.Properties.Add(new UnknownProperty(property.Key, value));
 					}
-
-					
-					//	TODO: any action if property isn't in model?
 				}
 
 				//	Add to validation results if there are errors
-				if (entityErrors.HasErrors) {
-					validationResults.EntityErrors.Add(entityErrors);
+				if (entityErrors.HasItems)
+				{
+					entityReportCollection.Add(entityErrors);
 				}
 
-				if (entityWarnings.HasWarnings)
-					validationResults.EntityWarnings.Add(entityWarnings);
-
-				if (!entityErrors.HasErrors) {
-					validationResults.ValidEntityCount++;
-				}
-
-				validationResults.TotalEntityCount++;
+				totalEntities++;
 			}
-			sw.Stop();
-			return validationResults;
+
+			//	TODO: Rethink this
+			var dataValidationReport = new DataValidationReport(httpRequest, schema, totalEntities, totalProperties); ;
+			dataValidationReport.EntityReports = entityReportCollection;
+
+			return dataValidationReport;
 		}
 
 		/// <summary>
@@ -165,13 +182,14 @@ namespace Transtatic.Json.Validation {
 		/// <param name="requiredProperties"></param>
 		/// <param name="data"></param>
 		/// <returns></returns>
-		private static IEnumerable<MissingPropertyError> HasRequiredProperties(HashSet<string> requiredProperties, ExpandoObject data) {
+		private IEnumerable<RequiredPropertyError> HasRequiredProperties(HashSet<string> requiredProperties, ExpandoObject data)
+		{
 			var missingProperties = requiredProperties.Except(((IDictionary<string, object>)data).Keys);
 
 			if (missingProperties.Any())
-				return missingProperties.Select(key => new MissingPropertyError(key));
+				return missingProperties.Select(key => new RequiredPropertyError(key));
 
-			return Enumerable.Empty<MissingPropertyError>();
+			return Enumerable.Empty<RequiredPropertyError>();
 		}
 
 		/// <summary>
@@ -180,14 +198,16 @@ namespace Transtatic.Json.Validation {
 		/// <param name="dataType">The data type of the given value</param>
 		/// <param name="value">The value to type check</param>
 		/// <returns>True of successful, otherwise throws exception</returns>
-		private static bool TryDataConversion(DataDescriptor descriptor, object data) {
+		private bool TryDataConversion(DataDescriptor descriptor, object data)
+		{
 			//	Gaurd against null reference
 			if (data == null)
 				throw new NullReferenceException();
 
 			var value = data.ToString();
 
-			switch (descriptor.DataType) {
+			switch (descriptor.DataType)
+			{
 				case "bool":
 					Convert<bool>(value);
 					break;
@@ -217,7 +237,8 @@ namespace Transtatic.Json.Validation {
 				case "string":
 					Convert<string>(value);
 
-					if (!string.IsNullOrEmpty(descriptor.Pattern)) {
+					if (!string.IsNullOrEmpty(descriptor.Pattern))
+					{
 						var regexValidator = new RegularExpressionAttribute(descriptor.Pattern);
 						return regexValidator.IsValid(value);
 					}
@@ -240,23 +261,27 @@ namespace Transtatic.Json.Validation {
 		/// <typeparam name="T">Type to converto</typeparam>
 		/// <param name="input">Value to convert</param>
 		/// <returns></returns>
-		private static T Convert<T>(string input) {
-			try {
+		private T Convert<T>(string input)
+		{
+			try
+			{
 				var converter = TypeDescriptor.GetConverter(typeof(T));
 
-				if (converter != null) {	
+				if (converter != null)
+				{
 					return (T)converter.ConvertFromString(input);
 				}
 				return default(T);
 			}
-			catch (NotSupportedException) {
+			catch (NotSupportedException)
+			{
 				return default(T);
 			}
-			catch (Exception e) {
+			catch (Exception e)
+			{
 				throw new InvalidCastException(string.Format("Value: {0} does not match schema type {1}", input, typeof(T).ToString()), e);
 			}
 		}
 	}
 	#endregion
 }
-

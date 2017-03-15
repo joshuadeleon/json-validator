@@ -7,21 +7,16 @@ using System.Threading.Tasks;
 namespace Transtatic.Json.Validation.Models
 {
 	/// <summary>
-	/// Property error report for a record (entity) in a data validation
+	/// Represents a missing property in the data which is required by the schema
 	/// </summary>
-	public class PropertyError : PropertyMessage
+	public class RequiredPropertyError : PropertyMessage
 	{
 		#region Properties
-		private const string messageFormat = "The {0} property was expected to be of type {1} but was given {2}";
-		public string ExpectedType { get; set; }
+		public const string messageFormat = "The {0} property is required and is missing.";
 		#endregion
 
 		#region Constructors
-		public PropertyError(string name, string value, string expectedType)
-			: base(name, value, string.Format(messageFormat, name, expectedType, value), Enums.MessageType.Error)
-		{
-			ExpectedType = expectedType;
-		}
+		public RequiredPropertyError(string name) : base(name, "", string.Format(messageFormat, name), Enums.MessageType.Missing) { }
 		#endregion
 
 		#region Methods
